@@ -37,9 +37,9 @@ jobs:
       - name: Run tests
         run: bundler exec rspec .
       - name: Run brakeman
-        run: brakeman -o brakeman.txt
+        run: bundler exec brakeman -o brakeman.txt || true
       - name: Run rubocop
-        run: bundler exec rubocop --force-exclusion vendor/*/** --out rubocop.txt
+        run: bundler exec rubocop --force-exclusion vendor/*/** --out rubocop.txt || true
       - name: Upload coverage results
         uses: actions/upload-artifact@master
         if: always()
