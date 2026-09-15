@@ -17,7 +17,9 @@ Rails.application.routes.draw do
       get :delete
     end
   end
-  
+
+  resources :books
+
   # get 'main/index'
   # get 'tasks/index'
   # get 'tasks/new'
