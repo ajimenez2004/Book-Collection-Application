@@ -18,11 +18,11 @@ RSpec.describe "/books", type: :request do
   # Book. As you add validations to Book, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    { title: "The Great Gatsby" }
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    { title: "" }
   }
 
   describe "GET /index" do
@@ -64,9 +64,14 @@ RSpec.describe "/books", type: :request do
         }.to change(Book, :count).by(1)
       end
 
-      it "redirects to the created book" do
+      it "redirects to the Home page" do
         post books_url, params: { book: valid_attributes }
-        expect(response).to redirect_to(book_url(Book.last))
+        expect(response).to redirect_to(books_url)
+      end
+
+      it "sets a success flash notice (sunny day)" do
+        post books_url, params: { book: valid_attributes }
+        expect(flash[:notice]).to eq("Book was successfully created.")
       end
     end
 
@@ -81,27 +86,47 @@ RSpec.describe "/books", type: :request do
         post books_url, params: { book: invalid_attributes }
         expect(response).to have_http_status(:unprocessable_content)
       end
+
+      it "shows the corresponding validation error (rainy day, blank title)" do
+        post books_url, params: { book: invalid_attributes }
+        expect(response.body).to include("can&#39;t be blank").or include("can't be blank")
+      end
+    end
+
+    it "saves the author" do
+      post books_url, params: { book: valid_attributes.merge(author: "F. Scott Fitzgerald") }
+      expect(Book.last.author).to eq("F. Scott Fitzgerald")
+    end
+
+    it "saves the price" do
+      post books_url, params: { book: valid_attributes.merge(price: 9.99) }
+      expect(Book.last.price).to eq(9.99)
+    end
+
+    it "saves the published_date" do
+      post books_url, params: { book: valid_attributes.merge(published_date: "1925-04-10") }
+      expect(Book.last.published_date).to eq(Date.new(1925, 4, 10))
     end
   end
 
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        { title: "A Different Title" }
       }
 
       it "updates the requested book" do
         book = Book.create! valid_attributes
         patch book_url(book), params: { book: new_attributes }
         book.reload
-        skip("Add assertions for updated state")
+        expect(book.title).to eq("A Different Title")
       end
 
-      it "redirects to the book" do
+      it "redirects to the Home page" do
         book = Book.create! valid_attributes
         patch book_url(book), params: { book: new_attributes }
         book.reload
-        expect(response).to redirect_to(book_url(book))
+        expect(response).to redirect_to(books_url)
       end
     end
 
